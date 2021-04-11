@@ -1,0 +1,114 @@
+---
+title: "Final Project"
+author: "Jade Gerlitz"
+date: "4/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+rm(list=ls())
+```
+
+```{r}
+rainfall = read.table("Precip.txt", sep="\t", header=TRUE)
+rainfall$rank = rank(-rainfall$rainfall)
+m = rainfall$rank
+N = 20
+a = 0.4
+i = 1
+P = vector(mode = "list", length = 20)
+
+
+while (i <= 20) {
+  P[[i]] = (m[i] - a)/(N + 1 - 2*a)
+  i = i + 1
+}
+
+rainfall$P = P
+```
+
+```{r}
+plot(x = rainfall$rainfall, y = P, xlab = "Precip depth (mm)")
+```
+```{r}
+x = rainfall$rainfall
+P = rainfall$P
+i = 1
+x.axis = vector(mode = "list", length = 20)
+y.axis = vector(mode = "list", length = 20)
+
+while (i <= 20) {
+  x.axis[[i]] = log(x[i])
+  y.axis[[i]] = log(log(1/P[[i]]))
+  i = i + 1
+}
+
+rainfall$lnx = x.axis
+rainfall$lnln = y.axis
+```
+
+```{r}
+rainfall$P = unlist(rainfall$P)
+rainfall$lnln = unlist(rainfall$lnln)
+rainfall$lnx = unlist(rainfall$lnx)
+
+plot(x = rainfall$lnx, y = rainfall$lnln)
+
+reg.line = lm(lnln ~ lnx, data = rainfall)
+abline(reg.line)
+b = reg.line$coefficients[1]
+m = reg.line$coefficients[2]
+
+```
+```{r}
+beta = m
+a = b/-m
+alpha = exp(a)
+
+i = 1
+
+while (i <= 20) {
+  x[[i]] = alpha * (log(1/P[[i]]))^(1/beta)
+  i = i + 1
+}
+
+rainfall$x = x
+rainfall$x = unlist(rainfall$x)
+
+plot(x = rainfall$rainfall, y = P, xlab = "Precip depth (mm)")
+points(x = x, y = P, pch = 15)
+```
+```{r}
+return.period = function(x){
+  P = exp(-(x/alpha)^beta)
+  P = (round(P, digits = 2))*100
+  return(P)
+}
+```
+
+```{r}
+precip.depth = function(P) {
+  x = alpha*(log(1/P))^(1/beta)
+  return(x)
+}
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
