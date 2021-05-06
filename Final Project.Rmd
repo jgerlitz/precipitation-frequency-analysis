@@ -1,7 +1,5 @@
 
 rm(list=ls())
-require(zoo)
-
 
 precip.events = read.csv("PrecipEvents.csv", header = TRUE)
 precip.events$ï..station_name = NULL
@@ -32,10 +30,6 @@ while (i <= 20) {
 
 rainfall$P = P
 
-
-
-plot(x = rainfall$rainfall, y = P, xlab = "Precip depth (mm)")
-
 x = rainfall$rainfall
 P = rainfall$P
 i = 1
@@ -54,8 +48,6 @@ rainfall$lnln = y.axis
 rainfall$P = unlist(rainfall$P)
 rainfall$lnln = unlist(rainfall$lnln)
 rainfall$lnx = unlist(rainfall$lnx)
-
-plot(x = rainfall$lnx, y = rainfall$lnln)
 
 reg.line = lm(lnln ~ lnx, data = rainfall)
 abline(reg.line)
@@ -76,8 +68,7 @@ while (i <= 20) {
 rainfall$x = x
 rainfall$x = unlist(rainfall$x)
 
-plot(x = rainfall$rainfall, y = P, xlab = "Precip depth (mm)")
-points(x = x, y = P, pch = 15)
+
 
 return.period = function(x){
   P = exp(-(x/alpha)^beta)
