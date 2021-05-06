@@ -1,22 +1,22 @@
----
-title: "Final Project"
-author: "Jade Gerlitz"
-date: "4/9/2021"
-output: html_document
----
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-```{r}
 rm(list=ls())
-```
+require(zoo)
 
-```{r}
-rainfall = read.table("Precip.txt", sep="\t", header=TRUE)
+
+precip.events = read.csv("PrecipEvents.csv", header = TRUE)
+precip.events$ï..station_name = NULL
+precip = precip.events$precip
+
+precip.threshold = function(threshold){
+  precip.loc = which(precip.events$precip >= threshold, arr.ind =TRUE)
+  new.precip = precip[precip.loc]
+  rainfall = as.data.frame(new.precip)
+  rainfall$year = precip.events$day[precip.loc]
+  rainfall$rainfall = rainfall$new.precip
+  rainfall$new.precip = NULL
+  return(rainfall)
+}
+
 rainfall$rank = rank(-rainfall$rainfall)
 m = rainfall$rank
 N = 20
@@ -31,12 +31,11 @@ while (i <= 20) {
 }
 
 rainfall$P = P
-```
 
-```{r}
+
+
 plot(x = rainfall$rainfall, y = P, xlab = "Precip depth (mm)")
-```
-```{r}
+
 x = rainfall$rainfall
 P = rainfall$P
 i = 1
@@ -51,9 +50,7 @@ while (i <= 20) {
 
 rainfall$lnx = x.axis
 rainfall$lnln = y.axis
-```
 
-```{r}
 rainfall$P = unlist(rainfall$P)
 rainfall$lnln = unlist(rainfall$lnln)
 rainfall$lnx = unlist(rainfall$lnx)
@@ -65,8 +62,6 @@ abline(reg.line)
 b = reg.line$coefficients[1]
 m = reg.line$coefficients[2]
 
-```
-```{r}
 beta = m
 a = b/-m
 alpha = exp(a)
@@ -83,19 +78,18 @@ rainfall$x = unlist(rainfall$x)
 
 plot(x = rainfall$rainfall, y = P, xlab = "Precip depth (mm)")
 points(x = x, y = P, pch = 15)
-```
-```{r}
+
 return.period = function(x){
   P = exp(-(x/alpha)^beta)
   P = (round(P, digits = 2))*100
   return(P)
 }
-```
 
-```{r}
+
+
 precip.depth = function(P) {
   x = alpha*(log(1/P))^(1/beta)
   return(x)
 }
-```
+
 
